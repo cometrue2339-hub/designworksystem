@@ -271,6 +271,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   .kpi-grid{grid-template-columns:1fr}
 }
 
+/* ===== LOGIN ===== */
+.login-overlay{position:fixed;inset:0;background:#0f172a;z-index:1000;display:none;align-items:center;justify-content:center}
+.login-box{background:#fff;border-radius:12px;padding:40px 36px;width:380px;max-width:calc(100vw - 32px);box-shadow:0 24px 64px rgba(0,0,0,.5)}
+#save-indicator{display:flex;align-items:center;gap:5px;font-size:13px;color:#10b981;opacity:0;transition:opacity .4s;pointer-events:none;white-space:nowrap}
+.role-btn{flex:1;padding:9px;font-size:14px;font-weight:600;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;color:var(--muted);transition:all .15s;font-family:inherit}
+.role-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.viewer-mode .admin-only{display:none!important}
+.viewer-badge{display:none;background:#f1f5f9;color:#475569;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;letter-spacing:.3px}
+.viewer-mode .viewer-badge{display:inline-flex}
+
 /* ===== TASK EDIT MODAL ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:210;display:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 .modal-overlay.show{display:block}
@@ -334,7 +344,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
       업무현황 대시보드
     </div>
-    <div class="nav-item" data-page="newtask" onclick="navigate('newtask')">
+    <div class="nav-item admin-only" data-page="newtask" onclick="navigate('newtask')">
       신규 업무 배정
     </div>
     <div class="sb-section" style="margin-top:8px">분석 · 설정</div>
@@ -351,10 +361,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   </div>
   <div class="sb-footer">
     <div class="sb-user">
-      <div>
-        <h4>이나선</h4>
-        <p>파트장 · 미디어콘텐츠제작팀</p>
+      <div style="flex:1;min-width:0">
+        <h4 id="sb-user-name">이나선</h4>
+        <p style="display:flex;align-items:center;gap:5px">
+          미디어콘텐츠제작팀
+          <span id="sb-role-badge" style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.3px;background:#334155;color:#94a3b8"></span>
+        </p>
       </div>
+      <button onclick="logout()" title="로그아웃"
+        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#cbd5e1;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .15s;flex-shrink:0;font-family:inherit;white-space:nowrap"
+        onmouseover="this.style.background='rgba(239,68,68,.18)';this.style.color='#fca5a5';this.style.borderColor='rgba(239,68,68,.35)'"
+        onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.color='#cbd5e1';this.style.borderColor='rgba(255,255,255,.14)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        로그아웃
+      </button>
     </div>
   </div>
 </aside>
@@ -374,13 +396,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       </div>
     </div>
     <div class="tb-right">
+      <div id="save-indicator">
+        <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="#10b981"/></svg>
+        저장됨
+      </div>
       <div class="tb-stat">진행 중 <strong id="stat-total">10건</strong></div>
       <div class="tb-stat">평균 워크로드 <strong id="stat-avg">40.4</strong></div>
-      <button class="btn btn-outline" onclick="openUploadModal()" style="white-space:nowrap;gap:5px">
+      <button class="btn btn-outline admin-only" onclick="openUploadModal()" style="white-space:nowrap;gap:5px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         주간업무 업로드
       </button>
-      <button class="btn btn-primary" onclick="navigate('newtask')">＋ 신규 업무 배정</button>
+      <span class="viewer-badge">열람 전용</span>
+      <button class="btn btn-primary admin-only" onclick="navigate('newtask')">＋ 신규 업무 배정</button>
     </div>
   </div>
 
@@ -389,17 +416,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-top">
-          <div><div class="kpi-label">총 진행 업무</div><div class="kpi-val">10</div></div>
+          <div><div class="kpi-label">총 진행 업무</div><div class="kpi-val" id="kpi-total-val">0</div></div>
           <div class="kpi-ico" style="background:#dbeafe"></div>
         </div>
-        <div class="kpi-sub">이번 주 <span style="color:var(--primary);font-weight:700">+2건</span> 신규 배정</div>
+        <div class="kpi-sub" id="kpi-total-sub">진행 중인 업무가 없습니다</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-top">
-          <div><div class="kpi-label">평균 워크로드 스코어</div><div class="kpi-val" style="color:#f59e0b">40.4</div></div>
+          <div><div class="kpi-label">평균 워크로드 스코어</div><div class="kpi-val" id="kpi-avg-val" style="color:#f59e0b">0</div></div>
           <div class="kpi-ico" style="background:#fef3c7"></div>
         </div>
-        <div class="kpi-sub up">▼ 지난주 대비 5.2p 감소</div>
+        <div class="kpi-sub" id="kpi-avg-sub">—</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-top">
@@ -421,7 +448,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <h3>디자이너별 워크로드 현황</h3>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="flex gap-6" id="status-badges"></div>
-        <button class="btn btn-outline btn-sm" onclick="openAddDesigner()" style="white-space:nowrap;gap:4px">＋ 신규 직원 추가</button>
+        <button class="btn btn-outline btn-sm admin-only" onclick="openAddDesigner()" style="white-space:nowrap;gap:4px">＋ 신규 직원 추가</button>
       </div>
     </div>
     <div class="d-grid" id="designer-cards"></div>
@@ -437,7 +464,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div class="card-head">
         <div><div class="card-title">진행 중 업무 목록</div><div class="card-desc" id="task-list-desc">전체 10건 · 마감일 기준 정렬</div></div>
         <div class="flex gap-8">
-          <button class="btn btn-outline btn-sm" onclick="openAddTask(null)" style="white-space:nowrap">＋ 직접 추가</button>
+          <button class="btn btn-outline btn-sm admin-only" onclick="openAddTask(null)" style="white-space:nowrap">＋ 직접 추가</button>
           <select class="form-ctrl" style="width:110px;padding:5px 10px;font-size:14px" id="f-designer" onchange="renderTaskTable()">
             <option value="">전체 담당자</option>
             <option>이나선</option><option>홍종욱</option><option>노수진</option><option>이예슬</option><option>김민지</option>
@@ -581,7 +608,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <div class="card-body" id="alert-thresholds"></div>
       </div>
     </div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+    <div class="admin-only" style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
       <button class="btn btn-outline">취소</button>
       <button class="btn btn-primary" onclick="saveRules()">규칙 저장</button>
     </div>
@@ -775,7 +802,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div style="min-width:0;flex:1">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
           <span id="dp-name" style="font-size:18px;font-weight:800"></span>
-          <button id="dp-leader-btn" class="btn btn-outline btn-sm" style="font-size:12px;padding:3px 9px" onclick="setAsLeader(currentPanelDesignerId)"></button>
+          <button id="dp-leader-btn" class="btn btn-outline btn-sm admin-only" style="font-size:12px;padding:3px 9px" onclick="setAsLeader(currentPanelDesignerId)"></button>
         </div>
         <div id="dp-role" style="font-size:13px;color:var(--muted)"></div>
       </div>
@@ -789,7 +816,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     </div>
     <div id="dp-tasks"></div>
   </div>
-  <div class="dp-footer" style="display:flex;flex-direction:column;gap:8px">
+  <div class="dp-footer admin-only" style="display:flex;flex-direction:column;gap:8px">
     <button class="btn w-full" onclick="openAddTask(currentPanelDesignerId)"
       style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;justify-content:center;font-size:15px">
       ＋ 업무 직접 추가
@@ -943,54 +970,64 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   </div>
 </div>
 
+<!-- ===== LOGIN OVERLAY ===== -->
+<div id="login-overlay" class="login-overlay">
+  <div class="login-box">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:48px;height:48px;background:#3b82f6;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>
+      </div>
+      <h2 style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:4px">디자인파트 업무 분배 시스템</h2>
+      <p style="font-size:14px;color:#64748b">미디어콘텐츠제작팀</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">역할 선택</label>
+      <div style="display:flex;gap:8px">
+        <button id="role-btn-admin" class="role-btn active" onclick="setLoginRole('admin')">관리자</button>
+        <button id="role-btn-viewer" class="role-btn" onclick="setLoginRole('viewer')">열람자</button>
+      </div>
+      <input type="hidden" id="login-role" value="admin">
+    </div>
+    <div id="login-pw-group" class="form-group" style="margin-bottom:6px">
+      <label class="form-label">비밀번호</label>
+      <input type="password" class="form-ctrl" id="login-pw" placeholder="비밀번호를 입력하세요"
+        onkeydown="if(event.key==='Enter')checkLogin()">
+    </div>
+    <div id="login-error" style="display:none;color:#ef4444;font-size:13px;margin-bottom:10px;font-weight:600">
+      비밀번호가 올바르지 않습니다.
+    </div>
+    <button class="btn btn-primary w-full" style="justify-content:center;padding:11px" onclick="checkLogin()">
+      로그인
+    </button>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // DATA
 // ============================================================
 const designers = [
-  { id:0, name:'이나선', role:'책임매니저 (파트장)', score:65, taskCount:3, onLeave:false,
-    contentCats:{'팀기획':2,'개인기획':1,'현업요청':0},
-    workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':2,'본인기획물':2,'행사디자인지원':0,'기타지원':3} },
-  { id:1, name:'홍종욱', role:'수석매니저', score:40, taskCount:2, onLeave:false,
-    contentCats:{'팀기획':0,'개인기획':1,'현업요청':1},
-    workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':1,'본인기획물':0,'행사디자인지원':1,'기타지원':1} },
-  { id:2, name:'노수진', role:'책임매니저', score:20, taskCount:1, onLeave:false,
-    contentCats:{'팀기획':0,'개인기획':0,'현업요청':1},
-    workTypes:{'2D그래픽영상':1,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0} },
-  { id:3, name:'이예슬', role:'책임매니저', score:72, taskCount:4, onLeave:false,
-    contentCats:{'팀기획':1,'개인기획':1,'현업요청':2},
-    workTypes:{'2D그래픽영상':2,'애니메이션':1,'디자인패키지':1,'본인기획물':2,'행사디자인지원':0,'기타지원':1} },
-  { id:4, name:'김민지', role:'주임', score:5, taskCount:0, onLeave:false,
+  { id:0, name:'이나선', role:'책임매니저 (파트장)', score:0, taskCount:0, onLeave:false,
+    contentCats:{'팀기획':0,'개인기획':0,'현업요청':0},
+    workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0} },
+  { id:1, name:'홍종욱', role:'수석매니저', score:0, taskCount:0, onLeave:false,
+    contentCats:{'팀기획':0,'개인기획':0,'현업요청':0},
+    workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0} },
+  { id:2, name:'노수진', role:'책임매니저', score:0, taskCount:0, onLeave:false,
+    contentCats:{'팀기획':0,'개인기획':0,'현업요청':0},
+    workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0} },
+  { id:3, name:'이예슬', role:'책임매니저', score:0, taskCount:0, onLeave:false,
+    contentCats:{'팀기획':0,'개인기획':0,'현업요청':0},
+    workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0} },
+  { id:4, name:'김민지', role:'주임', score:0, taskCount:0, onLeave:false,
     fixedDuties:true, fixedDutiesText:'디자인 지원',
     contentCats:{'팀기획':0,'개인기획':0,'현업요청':0},
     workTypes:{'2D그래픽영상':0,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0} },
 ];
 
-const tasks = [
-  {id:1,  name:'｢the journey｣',                        designer:'이나선', contentCat:'개인기획', workTypes:['디자인패키지','기타지원'], prog:40, deadline:'2026-07-15'},
-  {id:2,  name:'｢웹드라마｣',                            designer:'이나선', contentCat:'팀기획',   workTypes:['디자인패키지','본인기획물','기타지원'], prog:25, deadline:'2026-08-01'},
-  {id:3,  name:'스마트머니 ｢상반기 오프라인 이벤트｣',   designer:'이나선', contentCat:'팀기획',   workTypes:['본인기획물','기타지원'], prog:60, deadline:'2026-06-30'},
-  {id:4,  name:'｢2026 미래에셋 차세대 리더｣',          designer:'홍종욱', contentCat:'현업요청', workTypes:['행사디자인지원'], prog:70, deadline:'2026-06-20'},
-  {id:5,  name:'｢미래로 출근 중｣',                      designer:'홍종욱', contentCat:'개인기획', workTypes:['디자인패키지','기타지원'], prog:30, deadline:'2026-07-30'},
-  {id:6,  name:'｢공강｣',                               designer:'이예슬', contentCat:'팀기획',   workTypes:['디자인패키지','본인기획물','기타지원'], prog:45, deadline:'2026-07-10'},
-  {id:7,  name:'｢2분 완성 그림퀴즈｣',                  designer:'이예슬', contentCat:'개인기획', workTypes:['본인기획물','2D그래픽영상'], prog:55, deadline:'2026-06-25'},
-  {id:8,  name:'｢중개형 ISA｣',                         designer:'이예슬', contentCat:'현업요청', workTypes:['2D그래픽영상'], prog:80, deadline:'2026-06-15'},
-  {id:9,  name:'｢M-STOCK 이용가이드｣',                 designer:'이예슬', contentCat:'현업요청', workTypes:['2D그래픽영상'], prog:35, deadline:'2026-06-30'},
-  {id:10, name:'｢M-STOCK 이용가이드｣',                 designer:'노수진', contentCat:'현업요청', workTypes:['2D그래픽영상'], prog:35, deadline:'2026-06-30'},
-];
+const tasks = [];
 
-const historyData = [
-  {date:'2026-06-08', name:'｢M-STOCK 이용가이드｣',         designer:'노수진', contentCat:'현업요청', workTypes:['2D그래픽영상'],         method:'자동', status:'진행 중'},
-  {date:'2026-06-08', name:'｢M-STOCK 이용가이드｣',         designer:'이예슬', contentCat:'현업요청', workTypes:['2D그래픽영상'],         method:'자동', status:'진행 중'},
-  {date:'2026-06-07', name:'｢중개형 ISA｣',                 designer:'이예슬', contentCat:'현업요청', workTypes:['2D그래픽영상'],         method:'자동', status:'진행 중'},
-  {date:'2026-06-06', name:'｢2분 완성 그림퀴즈｣',          designer:'이예슬', contentCat:'개인기획', workTypes:['본인기획물','2D그래픽영상'], method:'수동', status:'진행 중'},
-  {date:'2026-06-05', name:'｢공강｣',                       designer:'이예슬', contentCat:'팀기획',   workTypes:['디자인패키지','본인기획물','기타지원'], method:'자동', status:'진행 중'},
-  {date:'2026-06-04', name:'｢미래로 출근 중｣',              designer:'홍종욱', contentCat:'개인기획', workTypes:['디자인패키지','기타지원'], method:'자동', status:'진행 중'},
-  {date:'2026-06-03', name:'｢2026 미래에셋 차세대 리더｣',  designer:'홍종욱', contentCat:'현업요청', workTypes:['행사디자인지원'],         method:'수동', status:'진행 중'},
-  {date:'2026-06-02', name:'스마트머니 ｢오프라인 이벤트｣', designer:'이나선', contentCat:'팀기획',   workTypes:['본인기획물','기타지원'],        method:'자동', status:'진행 중'},
-  {date:'2026-06-01', name:'｢웹드라마｣',                   designer:'이나선', contentCat:'팀기획',   workTypes:['디자인패키지','본인기획물','기타지원'], method:'자동', status:'진행 중'},
-  {date:'2026-05-31', name:'｢the journey｣',                designer:'이나선', contentCat:'개인기획', workTypes:['디자인패키지','기타지원'], method:'자동', status:'진행 중'},
-];
+const historyData = [];
 
 const alertsData = [
   {id:1, level:'danger',  title:'이예슬 - 높은 워크로드 감지',
@@ -1201,11 +1238,11 @@ function renderDesignerCards() {
           <div class="d-role">${d.role.replace(' (파트장)','').replace('(파트장)','')}</div>
         </div>
         <div style="display:flex;align-items:center;gap:4px">
-          <label class="leave-check" onclick="event.stopPropagation()" title="휴직 처리">
+          <label class="leave-check admin-only" onclick="event.stopPropagation()" title="휴직 처리">
             <input type="checkbox" ${d.onLeave?'checked':''} onchange="toggleLeave(${d.id},this.checked)">
             <span>휴직</span>
           </label>
-          <button class="d-more-btn" onclick="event.stopPropagation();openDesignerPanel(${d.id})" title="상세 보기 / 수정">⋮</button>
+          <button class="d-more-btn" onclick="event.stopPropagation();openDesignerPanel(${d.id})" title="상세 보기">⋮</button>
         </div>
       </div>
       ${d.onLeave
@@ -1237,6 +1274,7 @@ function toggleLeave(id, isLeave) {
   const d = designers.find(d=>d.id===id);
   if (!d) return;
   d.onLeave = isLeave;
+  persistData();
   renderDesignerCards();
   if (pageInited.newtask) renderWorkloadSnap();
   if (pageInited.dashboard && charts.workload) {
@@ -1286,7 +1324,7 @@ function renderTaskTable() {
       <td style="font-size:13px">${t.deadline}</td>
       <td>${done ? '<span class="tag t-green">완료</span>' : dday(t.deadline)}</td>
       <td style="text-align:center">
-        <button class="task-more-btn" onclick="openTaskEdit(${t.id})" title="세부사항 수정">⋮</button>
+        <button class="task-more-btn admin-only" onclick="openTaskEdit(${t.id})" title="세부사항 수정">⋮</button>
       </td>
     </tr>`;
   }).join('');
@@ -1583,6 +1621,7 @@ function confirmAssign() {
       <div style="font-size:15px;color:var(--muted)">"${name}"이(가) <strong>${d?.name||'—'}</strong>에게 배정되었습니다.</div>
     </div>`;
   document.getElementById('reco-box').classList.add('show');
+  persistData();
   renderWorkloadSnap();
 }
 
@@ -1726,6 +1765,7 @@ function saveTaskEdit() {
   syncDesignerStats();
   updateTopbarStats();
 
+  persistData();
   closeTaskEdit();
   renderTaskTable();
   renderDesignerCards();
@@ -1820,7 +1860,7 @@ function renderPanelContent(designerId) {
             ${t.name}
             ${(() => { const co = t.projectId ? tasks.filter(o => o.projectId === t.projectId && o.id !== t.id) : []; return co.length ? `<span class="tag t-teal" style="font-size:10px;padding:1px 5px;margin-left:3px;vertical-align:middle" title="공동: ${co.map(o=>o.designer).join(', ')}">공동</span>` : ''; })()}
           </div>
-          <div style="display:flex;gap:5px;flex-shrink:0">
+          <div class="admin-only" style="display:flex;gap:5px;flex-shrink:0">
             <button class="btn btn-outline btn-sm" style="padding:3px 9px;font-size:13px" onclick="openTaskEditFromPanel(${t.id})" title="수정">수정</button>
             <button class="btn btn-sm" style="background:#fff1f2;color:#dc2626;border:1px solid #fecaca;padding:3px 9px;font-size:13px" onclick="confirmDeleteTask(${t.id})" title="삭제">삭제</button>
           </div>
@@ -1854,6 +1894,7 @@ function saveFixedDuties(id) {
   const d = designers.find(d => d.id === id);
   if (!d) return;
   d.fixedDutiesText = val;
+  persistData();
   renderDesignerCards();
   renderPanelContent(id);
 }
@@ -1873,6 +1914,7 @@ function unlinkCurrentTask() {
       t.projectId = null;
       const remaining = tasks.filter(o => o.projectId === linked[0]?.projectId);
       if (remaining.length === 1) remaining[0].projectId = null;
+      persistData();
       renderTaskTable();
       renderDesignerCards();
       document.getElementById('edit-link-info').style.display = 'none';
@@ -1889,6 +1931,7 @@ function setAsLeader(designerId) {
   designers.forEach(d => { d.role = d.role.replace(' (파트장)', ''); });
   const d = designers.find(d => d.id === designerId);
   if (d) d.role += ' (파트장)';
+  persistData();
   renderDesignerCards();
   renderPanelContent(designerId);
 }
@@ -1903,6 +1946,7 @@ function confirmDeleteTask(taskId) {
     () => {
       tasks.splice(tasks.findIndex(tk => tk.id === taskId), 1);
       syncDesignerStats();
+      persistData();
       renderTaskTable();
       renderDesignerCards();
       if (currentPanelDesignerId !== null) renderPanelContent(currentPanelDesignerId);
@@ -1928,6 +1972,7 @@ function confirmDeleteDesigner() {
         if (tasks[i].designer === name) tasks.splice(i, 1);
       }
       designers.splice(designers.findIndex(d => d.id === currentPanelDesignerId), 1);
+      persistData();
       closeDesignerPanel();
       renderDesignerCards();
       renderTaskTable();
@@ -1958,6 +2003,17 @@ function updateTopbarStats() {
   const avg = nonFixed.length
     ? (nonFixed.reduce((s, d) => s + d.score, 0) / nonFixed.length).toFixed(1) : '0';
   document.getElementById('stat-avg').textContent = avg;
+
+  const kpiTotal = document.getElementById('kpi-total-val');
+  if (kpiTotal) kpiTotal.textContent = active.length;
+  const kpiTotalSub = document.getElementById('kpi-total-sub');
+  if (kpiTotalSub) kpiTotalSub.textContent = active.length === 0
+    ? '진행 중인 업무가 없습니다'
+    : `이번 주 ${active.length}건 진행 중`;
+  const kpiAvg = document.getElementById('kpi-avg-val');
+  if (kpiAvg) { kpiAvg.textContent = avg; kpiAvg.style.color = +avg >= 60 ? '#ef4444' : +avg >= 40 ? '#f59e0b' : '#10b981'; }
+  const kpiAvgSub = document.getElementById('kpi-avg-sub');
+  if (kpiAvgSub) kpiAvgSub.textContent = nonFixed.length ? `${nonFixed.length}명 기준 평균` : '—';
 }
 
 function showConfirm(title, message, sub, onConfirm) {
@@ -2004,6 +2060,7 @@ function saveNewDesigner() {
     contentCats: {'팀기획':0,'개인기획':0,'현업요청':0},
     workTypes: {'2D그래픽영상':0,'애니메이션':0,'디자인패키지':0,'본인기획물':0,'행사디자인지원':0,'기타지원':0},
   });
+  persistData();
   closeAddDesigner();
   renderDesignerCards();
   if (pageInited.newtask) renderWorkloadSnap();
@@ -2388,6 +2445,7 @@ function applyUploadedTasks() {
   if (!added) { alert('등록할 업무를 선택해주세요.'); return; }
 
   syncDesignerStats();
+  persistData();
   updateTopbarStats();
   renderTaskTable();
   renderDesignerCards();
@@ -2398,9 +2456,95 @@ function applyUploadedTasks() {
 }
 
 // ============================================================
+// AUTH & PERSISTENCE
+// ============================================================
+const APP_PASSWORD = 'mirae12#$';
+
+function setLoginRole(role) {
+  document.getElementById('login-role').value = role;
+  document.getElementById('role-btn-admin').classList.toggle('active', role === 'admin');
+  document.getElementById('role-btn-viewer').classList.toggle('active', role === 'viewer');
+  const pwGroup = document.getElementById('login-pw-group');
+  pwGroup.style.display = role === 'viewer' ? 'none' : 'block';
+  document.getElementById('login-error').style.display = 'none';
+  if (role === 'admin') setTimeout(() => document.getElementById('login-pw').focus(), 50);
+}
+
+function checkLogin() {
+  const role = document.getElementById('login-role').value;
+  if (role === 'viewer') {
+    document.getElementById('login-overlay').style.display = 'none';
+    sessionStorage.setItem('dsys_auth', '1');
+    sessionStorage.setItem('dsys_role', 'viewer');
+    initApp();
+    return;
+  }
+  const pw = document.getElementById('login-pw').value;
+  if (pw === APP_PASSWORD) {
+    document.getElementById('login-overlay').style.display = 'none';
+    sessionStorage.setItem('dsys_auth', '1');
+    sessionStorage.setItem('dsys_role', 'admin');
+    initApp();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    document.getElementById('login-pw').focus();
+  }
+}
+
+function applyRoleMode() {
+  const role = sessionStorage.getItem('dsys_role') || 'viewer';
+  if (role === 'viewer') {
+    document.body.classList.add('viewer-mode');
+  } else {
+    document.body.classList.remove('viewer-mode');
+  }
+  const nameEl = document.getElementById('sb-user-name');
+  if (nameEl) nameEl.textContent = role === 'admin' ? '파트장' : '열람자';
+
+  const badge = document.getElementById('sb-role-badge');
+  if (badge) {
+    badge.textContent = role === 'admin' ? '관리자' : '열람자';
+    badge.style.background = role === 'admin' ? '#1e3a5f' : '#334155';
+    badge.style.color = role === 'admin' ? '#93c5fd' : '#94a3b8';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('dsys_auth');
+  location.reload();
+}
+
+function loadData() {
+  try {
+    // 구버전 데모 데이터 자동 제거
+    const ver = localStorage.getItem('dsys_ver');
+    if (ver !== '2') { localStorage.removeItem('dsys_designers'); localStorage.removeItem('dsys_tasks'); localStorage.setItem('dsys_ver','2'); }
+    const sd = localStorage.getItem('dsys_designers');
+    const st = localStorage.getItem('dsys_tasks');
+    if (sd) { const p = JSON.parse(sd); designers.length = 0; p.forEach(d => designers.push(d)); }
+    if (st) { const p = JSON.parse(st); tasks.length = 0; p.forEach(t => tasks.push(t)); }
+  } catch(e) {}
+}
+
+function persistData() {
+  try {
+    localStorage.setItem('dsys_designers', JSON.stringify(designers));
+    localStorage.setItem('dsys_tasks', JSON.stringify(tasks));
+    const el = document.getElementById('save-indicator');
+    if (el) {
+      el.style.opacity = '1';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
+    }
+  } catch(e) {}
+}
+
+// ============================================================
 // INIT
 // ============================================================
-(function init() {
+function initApp() {
+  loadData();
   syncDesignerStats();
   renderDesignerCards();
   renderTaskTable();
@@ -2408,6 +2552,17 @@ function applyUploadedTasks() {
   updateTopbarStats();
   document.getElementById('t-deadline').value='2026-07-15';
   pageInited.dashboard=true;
+  applyRoleMode();
+}
+
+(function() {
+  if (sessionStorage.getItem('dsys_auth')) {
+    initApp();
+  } else {
+    const ov = document.getElementById('login-overlay');
+    ov.style.display = 'flex';
+    setTimeout(() => { const pw = document.getElementById('login-pw'); if(pw) pw.focus(); }, 80);
+  }
 })();
 </script>
 </body>
